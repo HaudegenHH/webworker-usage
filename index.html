@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Workers</title>
+</head>
+<body>
+
+  <header>
+    <h1>Web Workers</h1>
+    <button id="btn">Click me</button><span>&nbsp;..to fetch dummy data via web worker</span>
+  </header>
+
+  <main>
+    <pre id="output"></pre>
+  </main>    
+
+  <script>
+    let outputDiv = document.getElementById('output');
+    let btn = document.getElementById('btn');
+    let worker;
+    
+    document.addEventListener('DOMContentLoaded', init);
+    
+    function init(){
+        worker = new Worker('./js/web-worker.js');
+        worker.addEventListener('message', workerMessaged);
+        worker.addEventListener('error', workerError);
+        
+        //worker.postMessage('Get Started');
+        
+        btn.addEventListener('click', ()=>{
+            //send another message to the worker
+            //worker.postMessage('Other');
+            worker.postMessage({'do':'fetch'});
+        })
+    }
+    
+    async function workerMessaged(ev){
+        let records = ev.data;                
+
+        let output = ""
+        records.map(record => {
+          output += `UserId: ${record.userId}\nTitle: ${record.title}\nPost: ${record.body}\n\n`
+        })
+
+        outputDiv.textContent += output
+    }
+    
+    function workerError(err){
+        console.log(err.message, err.filename);
+    }
+    
+  </script>  
+</body>
+</html>
